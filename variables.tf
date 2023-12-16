@@ -74,6 +74,12 @@ variable "mail_from_enabled" {
   default     = true
 }
 
+variable "enable_email" {
+  type        = bool
+  default     = false
+  description = "Control whether or not to enable email identity for AWS SES."
+}
+
 variable "email_addresses" {
   type        = list(string)
   default     = []
