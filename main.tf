@@ -58,7 +58,7 @@ resource "aws_route53_record" "amazonses_dkim_record" {
 }
 
 resource "aws_ses_domain_mail_from" "default" {
-  count = module.this.enabled && var.enable_mail_from ? 1 : 0
+  count = module.this.enabled && var.mail_from_enabled ? 1 : 0
 
   domain           = aws_ses_domain_identity.ses_domain.*.domain
   mail_from_domain = local.stripped_mail_from_domain
