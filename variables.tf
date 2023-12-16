@@ -71,7 +71,7 @@ variable "ses_user_enabled" {
 variable "mail_from_enabled" {
   type        = bool
   description = "Enable 'mail from' domain."
-  default     = true
+  default     = false
 }
 
 variable "mail_from_domain" {
