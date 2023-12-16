@@ -33,7 +33,7 @@ resource "aws_route53_record" "ses_verification_record" {
 resource "aws_ses_domain_identity_verification" "default" {
   count = module.this.enabled && var.verify_domain ? 1 : 0
 
-  domain     = aws_ses_domain_identity.ses_domain.*.id
+  domain     = join("", aws_ses_domain_identity.ses_domain.*.domain)
   depends_on = [aws_route53_record.ses_verification_record]
 }
 
@@ -56,7 +56,7 @@ resource "aws_route53_record" "amazonses_dkim_record" {
 resource "aws_ses_domain_mail_from" "default" {
   count = module.this.enabled && var.mail_from_enabled ? 1 : 0
 
-  domain           = aws_ses_domain_identity.ses_domain.*.domain
+  domain           = join("", aws_ses_domain_identity.ses_domain.*.domain)
   mail_from_domain = local.stripped_mail_from_domain
 }
 
