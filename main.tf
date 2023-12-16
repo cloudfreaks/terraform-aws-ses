@@ -1,3 +1,9 @@
+locals {
+  # some ses resources don't allow for the terminating '.' in the domain name
+  # so use a replace function to strip it out
+  stripped_mail_from_domain = replace(var.mail_from_domain, "/[.]$/", "")
+}
+
 /*
 Create SES domain identity and verify it with Route53 DNS records
 */
@@ -35,16 +41,6 @@ resource "aws_ses_domain_dkim" "ses_domain_dkim" {
   count = module.this.enabled ? 1 : 0
 
   domain = join("", aws_ses_domain_identity.ses_domain.*.domain)
-}
-
-resource "aws_route53_record" "dkim" {
-  count = var.enabled && var.zone_id != "" ? 3 : 0
-
-  zone_id = var.zone_id
-  name    = format("%s._domainkey.%s", element(aws_ses_domain_dkim.ses_domain_dkim[0].dkim_tokens, count.index), var.domain)
-  type    = var.cname_type
-  ttl     = 600
-  records = [format("%s.dkim.amazonses.com", element(aws_ses_domain_dkim.ses_domain_dkim[0].dkim_tokens, count.index))]
 }
 
 resource "aws_route53_record" "amazonses_dkim_record" {
