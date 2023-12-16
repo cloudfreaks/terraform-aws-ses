@@ -74,6 +74,12 @@ variable "mail_from_enabled" {
   default     = true
 }
 
+variable "mail_from_domain" {
+  type        = string
+  default     = ""
+  description = "Subdomain (of the route53 zone) which is to be used as MAIL FROM address."
+}
+
 variable "enable_email" {
   type        = bool
   default     = false
