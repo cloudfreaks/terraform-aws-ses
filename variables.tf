@@ -67,3 +67,15 @@ variable "ses_user_enabled" {
   description = "Creates user with permission to send emails from SES domain"
   default     = true
 }
+
+variable "mail_from_enabled" {
+  type        = bool
+  description = "Enable 'mail from' domain."
+  default     = true
+}
+
+variable "email_addresses" {
+  type        = list(string)
+  default     = []
+  description = "List of email addresses to use for SES."
+}

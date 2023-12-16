@@ -8,7 +8,13 @@ resource "aws_ses_domain_identity" "ses_domain" {
   domain = var.domain
 }
 
-resource "aws_route53_record" "amazonses_verification_record" {
+resource "aws_ses_email_identity" "default" {
+  count = module.this.enabled && var.enable_email ? length(var.email_addresses) : 0
+
+  email = var.email_addresses[count.index]
+}
+
+resource "aws_route53_record" "ses_verification_record" {
   count = module.this.enabled && var.verify_domain ? 1 : 0
 
   zone_id = var.zone_id
@@ -18,10 +24,27 @@ resource "aws_route53_record" "amazonses_verification_record" {
   records = [join("", aws_ses_domain_identity.ses_domain.*.verification_token)]
 }
 
+resource "aws_ses_domain_identity_verification" "default" {
+  count = module.this.enabled && var.verify_domain ? 1 : 0
+
+  domain     = aws_ses_domain_identity.ses_domain.*.id
+  depends_on = [aws_route53_record.ses_verification_record]
+}
+
 resource "aws_ses_domain_dkim" "ses_domain_dkim" {
   count = module.this.enabled ? 1 : 0
 
   domain = join("", aws_ses_domain_identity.ses_domain.*.domain)
+}
+
+resource "aws_route53_record" "dkim" {
+  count = var.enabled && var.zone_id != "" ? 3 : 0
+
+  zone_id = var.zone_id
+  name    = format("%s._domainkey.%s", element(aws_ses_domain_dkim.ses_domain_dkim[0].dkim_tokens, count.index), var.domain)
+  type    = var.cname_type
+  ttl     = 600
+  records = [format("%s.dkim.amazonses.com", element(aws_ses_domain_dkim.ses_domain_dkim[0].dkim_tokens, count.index))]
 }
 
 resource "aws_route53_record" "amazonses_dkim_record" {
@@ -34,10 +57,17 @@ resource "aws_route53_record" "amazonses_dkim_record" {
   records = ["${element(aws_ses_domain_dkim.ses_domain_dkim.0.dkim_tokens, count.index)}.dkim.amazonses.com"]
 }
 
+resource "aws_ses_domain_mail_from" "default" {
+  count = module.this.enabled && var.enable_mail_from ? 1 : 0
+
+  domain           = aws_ses_domain_identity.ses_domain.*.domain
+  mail_from_domain = local.stripped_mail_from_domain
+}
 
 #-----------------------------------------------------------------------------------------------------------------------
 # OPTIONALLY CREATE A USER AND GROUP WITH PERMISSIONS TO SEND EMAILS FROM SES domain
 #-----------------------------------------------------------------------------------------------------------------------
+
 locals {
   create_group_enabled = module.this.enabled && var.ses_group_enabled
   create_user_enabled  = module.this.enabled && var.ses_user_enabled
