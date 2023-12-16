@@ -2,16 +2,16 @@
 Create SES domain identity and verify it with Route53 DNS records
 */
 
-resource "aws_ses_domain_identity" "ses_domain" {
-  count = module.this.enabled ? 1 : 0
-
-  domain = var.domain
-}
-
 resource "aws_ses_email_identity" "default" {
   count = module.this.enabled && var.enable_email ? length(var.email_addresses) : 0
 
   email = var.email_addresses[count.index]
+}
+
+resource "aws_ses_domain_identity" "ses_domain" {
+  count = module.this.enabled ? 1 : 0
+
+  domain = var.domain
 }
 
 resource "aws_route53_record" "ses_verification_record" {
