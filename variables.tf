@@ -24,12 +24,12 @@ variable "verify_dkim" {
 variable "iam_permissions" {
   type        = list(string)
   description = "Specifies permissions for the IAM user."
-  default     = ["ses:SendRawEmail"]
+  default     = ["ses:SendRawEmail", "ses:SendEmail"]
 }
 
 variable "iam_allowed_resources" {
   type        = list(string)
-  description = "Specifies resource ARNs that are enabled for `var.iam_permissions`. Wildcards are acceptable."
+  description = "Specifies resource ARNs that are enabled for `var.iam_permissions`. Wildcards are acceptable. Any entity created by this module is allowed by default."
   default     = []
 }
 
