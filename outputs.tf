@@ -48,5 +48,5 @@ output "ses_smtp_password" {
 
 output "access_key_id" {
   value       = module.ses_user.access_key_id
-  description = "The SMTP user which is access key ID."
+  description = "Access key ID of the generated IAM user, it's also the SMTP user."
 }

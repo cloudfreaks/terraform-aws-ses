@@ -60,6 +60,21 @@ resource "aws_ses_domain_mail_from" "default" {
   mail_from_domain = local.stripped_mail_from_domain
 }
 
+/*
+Setup an SNS topic and assign it to SES to get notifications about delivery/failure/bouncing
+Note: This is currently for domain only
+*/
+
+resource "aws_sns_topic" "delivery_notifications" {}
+
+resource "aws_ses_identity_notification_topic" "delivery_notifications" {
+  topic_arn                = aws_sns_topic.delivery_notifications.arn
+  notification_type        = "Delivery"
+  identity                 = aws_ses_domain_identity.ses_domain.*.domain
+  include_original_headers = true
+}
+
+
 #-----------------------------------------------------------------------------------------------------------------------
 # OPTIONALLY CREATE A USER AND GROUP WITH PERMISSIONS TO SEND EMAILS FROM SES domain
 #-----------------------------------------------------------------------------------------------------------------------
